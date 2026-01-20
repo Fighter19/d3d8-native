@@ -52,24 +52,6 @@ list(TRANSFORM WINED3D_SOURCES PREPEND wined3d/)
 
 add_library(wined3d SHARED ${WINED3D_SOURCES})
 
-set(VKD3D_SOURCES
-    cache.c
-    command.c
-    device.c
-    resource.c
-    state.c
-    utils.c
-    vkd3d_main.c
-)
-
-set(VKD3D_COMMON_SOURCES
-    blob.c
-    debuc.c
-    error.c
-    memory.c
-    utf8.c
-)
-
 set(VKD3D_SHADER_SOURCES
     checksum.c
     d3d_asm.c
