@@ -9,6 +9,8 @@ typedef int INT;
 typedef int32_t INT;
 typedef uint32_t UINT;
 
+typedef size_t SIZE_T;
+
 typedef int32_t LONG;
 typedef uint32_t ULONG;
 typedef uint32_t DWORD;
@@ -142,6 +144,7 @@ typedef struct _RPC_AUTHZ_HANDLE RPC_AUTHZ_HANDLE;
 #define E_FAIL ((HRESULT)0x80004005L)
 #define E_OUTOFMEMORY ((HRESULT)0x8007000EL)
 #define E_INVALIDARG ((HRESULT)0x80070057L)
+#define DXGI_ERROR_ALREADY_EXISTS ((HRESULT)0x887A0036L)
 #define DXGI_ERROR_NOT_FOUND ((HRESULT)0x887A0002L)
 #define DXGI_ERROR_MORE_DATA ((HRESULT)0x887A0003L)
 #define DXGI_ERROR_UNSUPPORTED ((HRESULT)0x887A0004L)
@@ -154,8 +157,13 @@ typedef struct _RPC_AUTHZ_HANDLE RPC_AUTHZ_HANDLE;
 #define DECLSPEC_EXPORT
 #define DECLSPEC_NORETURN [[noreturn]]
 
+#define CONST const
+#define CONST_VTBL const
+
 #define TRUE 1
 #define FALSE 0
+
+#define interface struct
 
 // There's no stdcall on non-Windows platforms
 #define __stdcall
@@ -178,6 +186,9 @@ typedef struct IAgileReference IAgileReference;
 #define DUMMYSTRUCTNAME s
 #define DUMMYUNIONNAME u
 #endif
+
+#define BEGIN_INTERFACE
+#define END_INTERFACE
 
 #define LF_FACESIZE 32
 #define CONTAINING_RECORD(address, type, field) \
