@@ -119,7 +119,7 @@ typedef struct _RPC_AUTHZ_HANDLE RPC_AUTHZ_HANDLE;
 #ifdef __cplusplus
 #define EXTERN_C extern "C"
 #else
-#define EXTERN_C
+#define EXTERN_C extern
 #endif
 
 
