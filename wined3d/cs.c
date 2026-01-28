@@ -3668,6 +3668,9 @@ struct wined3d_cs *wined3d_cs_create(struct wined3d_device *device,
         }
     }
 
+#ifndef USE_WINED3D_CSMT
+    wined3d_settings.cs_multithreaded &= ~WINED3D_CSMT_ENABLE;
+#else
     if (wined3d_settings.cs_multithreaded & WINED3D_CSMT_ENABLE
             && !RtlIsCriticalSectionLockedByThread(NtCurrentTeb()->Peb->LoaderLock))
     {
@@ -3716,6 +3719,7 @@ struct wined3d_cs *wined3d_cs_create(struct wined3d_device *device,
             goto fail;
         }
     }
+#endif
 
     TRACE("Created command stream %p.\n", cs);
     return cs;

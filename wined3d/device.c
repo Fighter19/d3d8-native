@@ -526,11 +526,11 @@ static void device_load_logo(struct wined3d_device *device, const char *filename
         ERR_(winediag)("Failed to load logo %s.\n", wine_dbgstr_a(filename));
         return;
     }
-    GetObjectA(hbm, sizeof(BITMAP), &bm);
+    GetObjectA((HGDIOBJ)hbm, sizeof(BITMAP), &bm);
 
     if (!(dcb = CreateCompatibleDC(NULL)))
         goto out;
-    SelectObject(dcb, hbm);
+    SelectObject(dcb, (HGDIOBJ)hbm);
 
     desc.resource_type = WINED3D_RTYPE_TEXTURE_2D;
     desc.format = WINED3DFMT_B5G6R5_UNORM;
@@ -565,7 +565,7 @@ static void device_load_logo(struct wined3d_device *device, const char *filename
 
 out:
     if (dcb) DeleteDC(dcb);
-    if (hbm) DeleteObject(hbm);
+    if (hbm) DeleteObject((HGDIOBJ)hbm);
 }
 
 /* Context activation is done by the caller. */
@@ -4848,11 +4848,11 @@ HRESULT CDECL wined3d_device_set_cursor_properties(struct wined3d_device *device
         wined3d_resource_unmap(&texture->resource, sub_resource_idx);
 
         /* Create our cursor and clean up. */
-        cursor = CreateIconIndirect(&cursor_info);
+        cursor = (HCURSOR)CreateIconIndirect(&cursor_info);
         if (cursor_info.hbmMask)
-            DeleteObject(cursor_info.hbmMask);
+            DeleteObject((HGDIOBJ)cursor_info.hbmMask);
         if (cursor_info.hbmColor)
-            DeleteObject(cursor_info.hbmColor);
+            DeleteObject((HGDIOBJ)cursor_info.hbmColor);
         if (device->hardwareCursor)
             DestroyCursor(device->hardwareCursor);
         device->hardwareCursor = cursor;

@@ -52,6 +52,17 @@ list(TRANSFORM WINED3D_SOURCES PREPEND wined3d/)
 
 add_library(wined3d SHARED ${WINED3D_SOURCES})
 
+set(COMPAT_SOURCES
+    wgl.c
+    module.c
+)
+
+list(TRANSFORM COMPAT_SOURCES PREPEND compat/src/)
+
+add_library(compat SHARED ${COMPAT_SOURCES})
+
+target_include_directories(compat PUBLIC include compat/include)
+
 set(VKD3D_SHADER_SOURCES
     checksum.c
     d3d_asm.c
@@ -77,10 +88,11 @@ set(VKD3D_UTILS_SOURCES
     vkd3d_utils_main.c
 )
 
-add_library(vkd3d-shader ${VKD3D_SHADER_SOURCES})
+add_library(vkd3d-shader SHARED ${VKD3D_SHADER_SOURCES})
 target_include_directories(vkd3d-shader PUBLIC vkd3d/include)
 target_include_directories(vkd3d-shader PRIVATE vkd3d/include/private)
-target_include_directories(vkd3d-shader PUBLIC compat/include)
 target_include_directories(vkd3d-shader PUBLIC compat/include/vkd3d)
 target_include_directories(vkd3d-shader PUBLIC vkd3d)
-target_include_directories(vkd3d-shader PUBLIC include)
+target_link_libraries(vkd3d-shader PRIVATE compat)
+
+target_link_libraries(wined3d PRIVATE vkd3d-shader compat)
