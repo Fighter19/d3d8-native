@@ -576,6 +576,7 @@ BOOL RegisterClassA(const WNDCLASSA *lpWndClass);
 BOOL UnregisterClassA(LPCSTR lpClassName, HINSTANCE hInstance);
 
 #define ERROR_FILE_NOT_FOUND 2L
+#define ERROR_CALL_NOT_IMPLEMENTED                         120
 #define MAX_PATH           260
 
 BOOL UnhookWindowsHookEx(HHOOK hhk);
@@ -686,3 +687,6 @@ BOOL StretchBlt(
   int     hSrc,
   DWORD   rop
 );
+
+#include <stdio.h>
+#define STUBBED(x) fprintf(stderr, "STUBBED: %s\n", __FUNCTION__);

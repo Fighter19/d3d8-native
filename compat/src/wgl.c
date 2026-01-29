@@ -166,6 +166,23 @@ int GetPixelFormat(HDC hdc)
   return 1;
 }
 
+int SetPixelFormat(HDC hdc, int format, const PIXELFORMATDESCRIPTOR *ppfd)
+{
+  if (hdc == NULL)
+  {
+    assert(false && "Invalid HDC in SetPixelFormat");
+    return 0;
+  }
+
+  if (format != 1)
+  {
+    assert(false && "Only pixel format 1 is supported in SetPixelFormat");
+    return 0;
+  }
+
+  return 1;
+}
+
 int DescribePixelFormat(HDC hdc, int iPixelFormat, UINT nBytes, PIXELFORMATDESCRIPTOR *ppfd)
 {
   if (iPixelFormat != 1)

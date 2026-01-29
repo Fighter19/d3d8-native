@@ -25,7 +25,7 @@ set(WINED3D_SOURCES
     device.c
     directx.c
     ffp_gl.c
-    #ffp_hlsl.c
+    ffp_hlsl.c
     gl_compat.c
     glsl_shader.c
     palette.c
@@ -38,7 +38,7 @@ set(WINED3D_SOURCES
     shader.c
     stateblock.c
     surface.c
-    swapchain.c
+    #swapchain.c
     texture_gl.c
     #texture_vk.c
     texture.c
@@ -53,13 +53,21 @@ list(TRANSFORM WINED3D_SOURCES PREPEND wined3d/)
 add_library(wined3d SHARED ${WINED3D_SOURCES})
 
 set(COMPAT_SOURCES
-    wgl.c
+    memory.c
+    messages.c
     module.c
+    registry.c
+    resource.c
+    synchronization.c
+    system.c
+    wgl.c
+    windowing.c
 )
 
 list(TRANSFORM COMPAT_SOURCES PREPEND compat/src/)
 
 add_library(compat SHARED ${COMPAT_SOURCES})
+target_link_libraries(compat PRIVATE SDL2 EGL GLESv2)
 
 target_include_directories(compat PUBLIC include compat/include)
 
