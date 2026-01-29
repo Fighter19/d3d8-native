@@ -34,7 +34,7 @@ set(WINED3D_SOURCES
     sampler.c
     shader_sm1.c
     shader_sm4.c
-    shader_spirv.c
+    #shader_spirv.c
     shader.c
     stateblock.c
     surface.c
