@@ -99,7 +99,31 @@ set(VKD3D_UTILS_SOURCES
     vkd3d_utils_main.c
 )
 
+# Add Bison and Flex rules for hlsl.y and hlsl.l
+find_package(BISON REQUIRED)
+find_package(FLEX REQUIRED)
+
+BISON_TARGET(HLSLParser vkd3d/libs/vkd3d-shader/hlsl.y ${CMAKE_CURRENT_BINARY_DIR}/hlsl.tab.c)
+FLEX_TARGET(HLSLLexer vkd3d/libs/vkd3d-shader/hlsl.l ${CMAKE_CURRENT_BINARY_DIR}/hlsl.yy.c)
+ADD_FLEX_BISON_DEPENDENCY(HLSLLexer HLSLParser)
+
+# Add Bison and Flex rules for preproc.y and preproc.l
+BISON_TARGET(PreprocParser vkd3d/libs/vkd3d-shader/preproc.y ${CMAKE_CURRENT_BINARY_DIR}/preproc.tab.c)
+FLEX_TARGET(PreprocLexer vkd3d/libs/vkd3d-shader/preproc.l ${CMAKE_CURRENT_BINARY_DIR}/preproc.yy.c)
+ADD_FLEX_BISON_DEPENDENCY(PreprocLexer PreprocParser)
+
+# Include the generated files in the VKD3D_SHADER_SOURCES
+list(APPEND VKD3D_SHADER_SOURCES
+    ${CMAKE_CURRENT_BINARY_DIR}/hlsl.tab.c
+    ${CMAKE_CURRENT_BINARY_DIR}/hlsl.yy.c
+    ${CMAKE_CURRENT_BINARY_DIR}/preproc.tab.c
+    ${CMAKE_CURRENT_BINARY_DIR}/preproc.yy.c
+)
+
 add_library(vkd3d-shader SHARED ${VKD3D_SHADER_SOURCES})
+# Ensure the binary directory is included for generated headers
+target_include_directories(vkd3d-shader PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(vkd3d-shader PRIVATE vkd3d/libs/vkd3d-shader)
 target_include_directories(vkd3d-shader PUBLIC vkd3d/include)
 target_include_directories(vkd3d-shader PRIVATE vkd3d/include/private)
 target_include_directories(vkd3d-shader PUBLIC compat/include/vkd3d)
