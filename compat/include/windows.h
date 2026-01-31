@@ -381,6 +381,7 @@ INT ReleaseDC(HWND hWnd, HDC hDC);
 #define WS_EX_WINDOWEDGE 0x00000100
 #define WS_EX_CLIENTEDGE 0x00000200
 #define WS_EX_TOPMOST    0x00000008
+#define WS_VISIBLE       0x10000000
 
 int ChoosePixelFormat(HDC hdc, const PIXELFORMATDESCRIPTOR *ppfd);
 int GetPixelFormat(HDC hdc);
@@ -623,10 +624,15 @@ LONG GetWindowLongW(HWND hWnd, int nIndex);
 BOOL ClientToScreen(HWND hWnd, LPPOINT lpPoint);
 BOOL GetWindowRect(HWND hWnd, LPRECT lpRect);
 
-#define SWP_NOACTIVATE    0x0010
 #define SWP_NOZORDER      0x0004
+#define SWP_NOACTIVATE    0x0010
+#define SWP_FRAMECHANGED  0x0020
+#define SWP_SHOWWINDOW    0x0040
+#define SWP_HIDEWINDOW    0x0080
 
+#define SW_HIDE 0
 #define SW_MINIMIZE 6
+#define SW_SHOW 5
 
 LRESULT CallNextHookEx(HHOOK hhk, int nCode, WPARAM wParam, LPARAM lParam);
 
@@ -634,6 +640,7 @@ typedef LRESULT (CALLBACK *HOOKPROC)(int code, WPARAM wParam, LPARAM lParam);
 HHOOK SetWindowsHookExW(int idHook, HOOKPROC lpfn, HINSTANCE hMod, DWORD dwThreadId);
 #define WH_GETMESSAGE        3
 
+BOOL IsWindow(HWND hWnd);
 BOOL IsWindowUnicode(HWND hWnd);
 BOOL IsWindowVisible(HWND hWnd);
 
@@ -687,6 +694,42 @@ BOOL StretchBlt(
   int     hSrc,
   DWORD   rop
 );
+
+BOOL AdjustWindowRectEx(
+  LPRECT lpRect,
+  DWORD  dwStyle,
+  BOOL   bMenu,
+  DWORD  dwExStyle
+);
+
+typedef void (CALLBACK *TIMERPROC)(HWND, UINT, UINT_PTR, DWORD);
+
+UINT_PTR SetTimer(
+  HWND      hWnd,
+  UINT_PTR  uIDEvent,
+  UINT      uElapse,
+  TIMERPROC lpTimerFunc
+);
+
+BOOL KillTimer(
+  HWND hWnd,
+  UINT_PTR uIDEvent
+);
+
+BOOL MoveWindow(
+  HWND hWnd,
+  int  X,
+  int  Y,
+  int  nWidth,
+  int  nHeight,
+  BOOL bRepaint
+);
+
+LONG SetWindowLongW(HWND hWnd, int nIndex, LONG dwNewLong);
+
+#define HWND_TOPMOST        ((HWND)-1)
+#define HWND_NOTOPMOST      ((HWND)-2)
+
 
 #include <stdio.h>
 #define STUBBED(x) fprintf(stderr, "STUBBED: %s\n", __FUNCTION__);

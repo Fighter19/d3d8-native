@@ -3,6 +3,11 @@
 #include "ntstatus.h"
 #include "ddk/d3dkmthk.h"
 
+BOOL IsWindow(HWND hWnd)
+{
+  return 0;
+}
+
 BOOL IsWindowUnicode(HWND hWnd)
 {
   STUBBED();
@@ -22,6 +27,32 @@ BOOL ShowWindow(HWND hWnd, int nCmdShow)
 }
 
 DWORD GetWindowThreadProcessId(HWND hWnd, LPDWORD lpdwProcessId)
+{
+  STUBBED();
+  return 0;
+}
+
+BOOL ClientToScreen(HWND hWnd, LPPOINT lpPoint)
+{
+  // From my understanding this is only useful, for windows with decorations
+  // which we don't have for most games, so we can just return the same point.
+  // This should be sufficient for most use cases.
+  return TRUE;
+}
+
+BOOL MoveWindow(HWND hWnd, int X, int Y, int nWidth, int nHeight, BOOL bRepaint)
+{
+  STUBBED();
+  return FALSE;
+}
+
+LONG GetWindowLongW(HWND hWnd, int nIndex)
+{
+  STUBBED();
+  return 0;
+}
+
+LONG SetWindowLongW(HWND hWnd, int nIndex, LONG dwNewLong)
 {
   STUBBED();
   return 0;
@@ -155,6 +186,12 @@ NTSTATUS WINAPI D3DKMTCreateDCFromMemory(D3DKMT_CREATEDCFROMMEMORY *desc)
   return 0;
 }
 
+NTSTATUS WINAPI D3DKMTEscape( const D3DKMT_ESCAPE *desc )
+{
+  STUBBED();
+  return 0;
+}
+
 NTSTATUS WINAPI D3DKMTOpenAdapterFromLuid(D3DKMT_OPENADAPTERFROMLUID *desc)
 {
   STUBBED();
@@ -228,6 +265,24 @@ HBITMAP LoadImageA(
 {
   STUBBED();
   return NULL;
+}
+
+BOOL StretchBlt(
+  HDC     hdcDest,
+  int     xDest,
+  int     yDest,
+  int     wDest,
+  int     hDest,
+  HDC     hdcSrc,
+  int     xSrc,
+  int     ySrc,
+  int     wSrc,
+  int     hSrc,
+  DWORD   rop
+)
+{
+  STUBBED();
+  return FALSE;
 }
 
 BOOL BitBlt(
@@ -347,6 +402,18 @@ BOOL OffsetRect(LPRECT lprc, int dx, int dy)
   lprc->top += dy;
   lprc->bottom += dy;
   return TRUE;
+}
+
+BOOL AdjustWindowRectEx(LPRECT lpRect, DWORD dwStyle, BOOL bMenu, DWORD dwExStyle)
+{
+  STUBBED();
+  return FALSE;
+}
+
+BOOL GetWindowRect(HWND hWnd, LPRECT lpRect)
+{
+  STUBBED();
+  return FALSE;
 }
 
 INT MapWindowPoints(HWND hWndFrom, HWND hWndTo, LPPOINT lpPoints, UINT cPoints)

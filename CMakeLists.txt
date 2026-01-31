@@ -38,7 +38,7 @@ set(WINED3D_SOURCES
     shader.c
     stateblock.c
     surface.c
-    #swapchain.c
+    swapchain.c
     texture_gl.c
     #texture_vk.c
     texture.c

@@ -78,6 +78,14 @@ HDC GetDC(HWND hWnd)
   return NULL;
 }
 
+HDC GetDCEx(HWND hWnd, HRGN hrgnClip, DWORD flags)
+{
+  // Retrieves a handle to a device context (DC) for the client area of a specified window or for the entire screen with additional options
+  assert(false && "GetDCEx is not implemented yet");
+
+  return NULL;
+}
+
 HWND CreateWindowA(
   LPCSTR               lpClassName,
   LPCSTR               lpWindowName,
