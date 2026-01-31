@@ -1,6 +1,13 @@
 #include <windows.h>
 #include <stdlib.h>
 
+HANDLE GetProcessHeap(void)
+{
+  // Retrieves a handle to the default heap of the calling process
+  STUBBED();
+  return NULL;
+}
+
 LPVOID HeapCreate(DWORD flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize)
 {
   STUBBED();

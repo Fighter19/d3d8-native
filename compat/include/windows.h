@@ -271,6 +271,9 @@ typedef struct _LAYERPLANEDESCRIPTOR LAYERPLANEDESCRIPTOR;
 #define DECLSPEC_IMPORT
 #define DECLSPEC_EXPORT
 #define DECLSPEC_NORETURN __attribute__((noreturn))
+#define DECLSPEC_HOTPATCH
+
+#define __MSABI_LONG(x) x ## L
 
 #define CONST const
 #define CONST_VTBL const
@@ -462,6 +465,7 @@ static inline BOOL IntersectRect(LPRECT lprcDst, const RECT *lprc1, const RECT *
 
 BOOL CloseHandle(HANDLE hObject);
 
+HANDLE GetProcessHeap(void);
 LPVOID HeapCreate(DWORD flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize);
 BOOL HeapDestroy(LPVOID hHeap);
 LPVOID HeapAlloc(LPVOID hHeap, DWORD dwFlags, SIZE_T dwBytes);

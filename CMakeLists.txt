@@ -131,3 +131,19 @@ target_include_directories(vkd3d-shader PUBLIC vkd3d)
 target_link_libraries(vkd3d-shader PRIVATE compat)
 
 target_link_libraries(wined3d PRIVATE vkd3d-shader compat)
+
+set(D3D8_NATIVE_SOURCES
+    d3d8_main.c
+    device.c
+    directx.c
+    shader.c
+    surface.c
+    swapchain.c
+    texture.c
+    vertexdeclaration.c
+    volume.c
+)
+
+list(TRANSFORM D3D8_NATIVE_SOURCES PREPEND d3d8/)
+add_library(d3d8-native SHARED ${D3D8_NATIVE_SOURCES})
+target_link_libraries(d3d8-native PRIVATE wined3d compat)
