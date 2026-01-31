@@ -63,7 +63,7 @@ typedef VOID* LPVOID;
 typedef VOID* HANDLE;
 typedef HANDLE* LPHANDLE;
 
-#define DECLARE_HANDLE(name) typedef struct name##__ { int unused; } *name;
+#define DECLARE_HANDLE(name) typedef struct name##__ *name;
 DECLARE_HANDLE(HGLOBAL)
 DECLARE_HANDLE(HTASK)
 DECLARE_HANDLE(HBITMAP)

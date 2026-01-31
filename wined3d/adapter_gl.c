@@ -23,6 +23,8 @@
 
 #include <stdio.h>
 
+#pragma clang optimize off
+
 #include "wined3d_private.h"
 #include "wined3d_gl.h"
 

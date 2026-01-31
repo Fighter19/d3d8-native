@@ -2,24 +2,90 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_egl.h>
 
+typedef enum {
+  HANDLE_TYPE_DC,
+  HANDLE_TYPE_GLRC,
+} HHANDLE_TYPE;
+
+typedef struct OBJECT__ {
+  HHANDLE_TYPE type; 
+} OBJECT, *HOBJECT;
+
+typedef struct HDC__ {
+  struct OBJECT__ obj;
+  SDL_Window *window;
+} DC, *HDC;
+
+typedef struct HGLRC__ {
+  struct OBJECT__ obj;
+  SDL_GLContext sdlGlContext;
+} GLRC, *HGLRC;
+
 
 HGLRC wglCreateContext(HDC hdc)
 {
-  EGLDisplay disp = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-  EGLContext ctx = eglCreateContext(disp, NULL, EGL_NO_CONTEXT, NULL);
-  if (ctx == EGL_NO_CONTEXT)
+  SDL_GLContext sdlGlContext = SDL_GL_CreateContext((SDL_Window *)hdc->window);
+  if (sdlGlContext == NULL)
   {
-    assert(false && "eglCreateContext failed in wglCreateContext");
+    assert(false && "SDL_GL_CreateContext failed in wglCreateContext");
     return NULL;
   }
-  return (HGLRC)ctx;
+
+  HGLRC hglrc = (HGLRC)malloc(sizeof(GLRC));
+  hglrc->obj.type = HANDLE_TYPE_GLRC;
+  hglrc->sdlGlContext = sdlGlContext;
+  return hglrc;
 }
 
 BOOL wglMakeCurrent(HDC hdc, HGLRC hglrc)
 {
-  // Sets the associated OpenGL rendering context to the device context
-  assert(false && "wglMakeCurrent is not implemented yet");
+  SDL_Window *currentWindow = NULL;
+  SDL_GLContext currentContext = NULL;
+  if (hdc)
+  {
+    if (hdc->obj.type != HANDLE_TYPE_DC)
+    {
+      assert(false && "Invalid HDC type in wglMakeCurrent");
+      return FALSE;
+    }
+    currentWindow = (SDL_Window *)hdc->window;
+    if (!currentWindow)
+    {
+      assert(false && "Invalid window in HDC in wglMakeCurrent");
+      return FALSE;
+    }
+  }
 
+  if (hglrc)
+  {
+    if (hglrc->obj.type != HANDLE_TYPE_GLRC)
+    {
+      assert(false && "Invalid HGLRC type in wglMakeCurrent");
+      return FALSE;
+    }
+    currentContext = hglrc->sdlGlContext;
+    if (!currentContext)
+    {
+      assert(false && "Invalid SDL_GLContext in HGLRC in wglMakeCurrent");
+      return FALSE;
+    }
+  }
+
+  if (!currentWindow)
+  {
+    currentWindow = SDL_GL_GetCurrentWindow();
+  }
+
+  if (!currentContext)
+  {
+    currentContext = SDL_GL_GetCurrentContext();
+  }
+
+  if (SDL_GL_MakeCurrent(currentWindow, currentContext) != 0)
+  {
+    assert(false && "SDL_GL_MakeCurrent failed in wglMakeCurrent");
+    return FALSE;
+  }
   return TRUE;
 }
 
@@ -41,9 +107,9 @@ HGLRC wglGetCurrentContext(void)
 
 BOOL wglDeleteContext(HGLRC hglrc)
 {
-  // Deletes the specified OpenGL rendering context
-  assert(false && "wglDeleteContext is not implemented yet");
-
+  SDL_GLContext sdlGlContext = hglrc->sdlGlContext;
+  SDL_GL_DeleteContext(sdlGlContext);
+  free(hglrc);
   return TRUE;
 }
 
@@ -72,10 +138,17 @@ HWND WindowFromDC(HDC dc)
 
 HDC GetDC(HWND hWnd)
 {
-  // Retrieves a handle to a device context (DC) for the client area of a specified window or for the entire screen
-  assert(false && "GetDC is not implemented yet");
+  if (!hWnd)
+  {
+    assert(false && "Invalid HWND in GetDC");
+    return NULL;
+  }
 
-  return NULL;
+  HDC hdc = (HDC)malloc(sizeof(DC));
+  hdc->obj.type = HANDLE_TYPE_DC;
+  hdc->window = (SDL_Window *)hWnd;
+
+  return hdc;
 }
 
 HDC GetDCEx(HWND hWnd, HRGN hrgnClip, DWORD flags)
@@ -143,8 +216,23 @@ void DestroyWindow(HWND hWnd)
 INT ReleaseDC(HWND hWnd, HDC hDC)
 {
   // Releases a device context (DC), freeing it for use by other applications
-  assert(false && "ReleaseDC is not implemented yet");
-  return 0;
+  if (!hDC)
+  {
+    assert(false && "Invalid HDC in ReleaseDC");
+    return FALSE;
+  }
+  if (hDC->obj.type != HANDLE_TYPE_DC)
+  {
+    assert(false && "Invalid HDC type in ReleaseDC");
+    return FALSE;
+  }
+  if (hWnd != (HWND)hDC->window)
+  {
+    assert(false && "HDC does not belong to the specified HWND in ReleaseDC");
+    return FALSE;
+  }
+  free(hDC);
+  return TRUE;
 }
 
 int ChoosePixelFormat(HDC hdc, const PIXELFORMATDESCRIPTOR *ppfd)
@@ -193,6 +281,12 @@ int SetPixelFormat(HDC hdc, int format, const PIXELFORMATDESCRIPTOR *ppfd)
 
 int DescribePixelFormat(HDC hdc, int iPixelFormat, UINT nBytes, PIXELFORMATDESCRIPTOR *ppfd)
 {
+  if (iPixelFormat == 0)
+  {
+    // Returns the count of pixel formats
+    return 1;
+  }
+
   if (iPixelFormat != 1)
   {
     assert(false && "Only pixel format 1 is supported in DescribePixelFormat");
@@ -219,7 +313,9 @@ int DescribePixelFormat(HDC hdc, int iPixelFormat, UINT nBytes, PIXELFORMATDESCR
   return 1;
 }
 
+extern HMODULE g_sdlOpenGLModule;
+
 PROC wglGetProcAddress(const char *lpszProc)
 {
-  return (PROC)eglGetProcAddress(lpszProc);
+  return GetProcAddress(g_sdlOpenGLModule, lpszProc);
 }

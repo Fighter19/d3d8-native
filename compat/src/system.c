@@ -48,5 +48,8 @@ BOOL GlobalMemoryStatusEx(LPMEMORYSTATUSEX lpBuffer)
 BOOL AllocateLocallyUniqueId(LUID *pluid)
 {
   STUBBED();
-  return FALSE;
+  // TODO: Determine if this is actually required
+  pluid->LowPart = 0xDEADBEEF;
+  pluid->HighPart = 0xC0FEBABE;
+  return TRUE;
 }
