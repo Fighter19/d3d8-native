@@ -91,6 +91,9 @@ set(VKD3D_SHADER_SOURCES
 
 list(TRANSFORM VKD3D_SHADER_SOURCES PREPEND vkd3d/libs/vkd3d-shader/)
 
+# Append vkd3d_compat/vkd3d.c to WINED3D_SOURCES
+list(APPEND VKD3D_SHADER_SOURCES vkd3d_compat/vkd3d.c vkd3d/libs/vkd3d-common/memory.c)
+
 set(VKD3D_UTILS_SOURCES
     reflection.c
     vkd3d_utils_main.c
