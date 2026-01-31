@@ -1,6 +1,9 @@
 #include <windows.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_egl.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_egl.h>
+#include <stdlib.h>
+
+#pragma clang optimize off
 
 typedef enum {
   HANDLE_TYPE_DC,
@@ -81,8 +84,9 @@ BOOL wglMakeCurrent(HDC hdc, HGLRC hglrc)
     currentContext = SDL_GL_GetCurrentContext();
   }
 
-  if (SDL_GL_MakeCurrent(currentWindow, currentContext) != 0)
+  if (!SDL_GL_MakeCurrent(currentWindow, currentContext))
   {
+    printf("SDL_GL_MakeCurrent failed: %s\n", SDL_GetError());
     assert(false && "SDL_GL_MakeCurrent failed in wglMakeCurrent");
     return FALSE;
   }
@@ -108,7 +112,7 @@ HGLRC wglGetCurrentContext(void)
 BOOL wglDeleteContext(HGLRC hglrc)
 {
   SDL_GLContext sdlGlContext = hglrc->sdlGlContext;
-  SDL_GL_DeleteContext(sdlGlContext);
+  SDL_GL_DestroyContext(sdlGlContext);
   free(hglrc);
   return TRUE;
 }
@@ -174,8 +178,6 @@ HWND CreateWindowA(
 )
 {
   SDL_Window *window = SDL_CreateWindow(lpWindowName,
-                                        X,
-                                        Y,
                                         nWidth,
                                         nHeight,
                                         SDL_WINDOW_OPENGL);

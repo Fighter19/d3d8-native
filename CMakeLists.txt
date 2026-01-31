@@ -67,7 +67,8 @@ set(COMPAT_SOURCES
 list(TRANSFORM COMPAT_SOURCES PREPEND compat/src/)
 
 add_library(compat SHARED ${COMPAT_SOURCES})
-target_link_libraries(compat PRIVATE SDL2 EGL GLESv2)
+find_package(SDL3 CONFIG REQUIRED)
+target_link_libraries(compat PRIVATE SDL3::SDL3 EGL GLESv2)
 
 target_include_directories(compat PUBLIC include compat/include)
 

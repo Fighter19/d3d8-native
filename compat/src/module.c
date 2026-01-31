@@ -1,7 +1,7 @@
 #include <windows.h>
 #include <dlfcn.h>
 #include <strings.h>
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 
 typedef struct HMODULE__ {
   bool bIsSDLOpenGL;
@@ -41,8 +41,8 @@ HMODULE GetModuleHandleA(LPCSTR lpModuleName)
   if (lpModuleName && strcasecmp(lpModuleName, "opengl32.dll") == 0)
   {
     // Initialize SDL OpenGL library if not already done
-    int success = SDL_Init(SDL_INIT_VIDEO);
-    if (success != 0)
+    bool success = SDL_InitSubSystem(SDL_INIT_VIDEO);
+    if (!success)
     {
       printf("GetModuleHandleA: Failed to initialize SDL video subsystem: %s\n", SDL_GetError());
       return NULL;
@@ -50,7 +50,7 @@ HMODULE GetModuleHandleA(LPCSTR lpModuleName)
 
 
     success = SDL_GL_LoadLibrary(NULL);
-    if (success != 0)
+    if (!success)
     {
       printf("GetProcAddress: Failed to load SDL OpenGL library\n");
       printf("SDL Error: %s\n", SDL_GetError());
