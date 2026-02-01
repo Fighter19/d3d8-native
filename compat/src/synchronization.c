@@ -1,6 +1,73 @@
+#define _GNU_SOURCE
 #include <windows.h>
 #include <pthread.h>
 #include <stdlib.h>
+
+BOOL InitializeCriticalSectionEx(CRITICAL_SECTION *cs, DWORD spincount, DWORD flags)
+{
+  pthread_mutexattr_t attr;
+  int res;
+  res = pthread_mutexattr_init(&attr);
+  if (res != 0)
+    return FALSE;
+
+  res = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+  if (res != 0)
+    return FALSE;
+
+  res = pthread_mutex_init(&cs->mutex, &attr);
+  if (res != 0)
+    return FALSE;
+
+  pthread_mutexattr_destroy(&attr);
+
+  cs->DebugInfo = (RTL_CRITICAL_SECTION_DEBUG *)-1;
+  if (flags & RTL_CRITICAL_SECTION_FLAG_FORCE_DEBUG_INFO)
+  {
+    cs->DebugInfo = (RTL_CRITICAL_SECTION_DEBUG *)malloc(sizeof(RTL_CRITICAL_SECTION_DEBUG));
+    if (!cs->DebugInfo)
+      return FALSE;
+    memset(cs->DebugInfo, 0, sizeof(RTL_CRITICAL_SECTION_DEBUG));
+  }
+  return TRUE;
+}
+
+void EnterCriticalSection(CRITICAL_SECTION *cs)
+{
+  if (!cs)
+    return;
+  DWORD_PTR name = 0;
+  if (cs->DebugInfo != (RTL_CRITICAL_SECTION_DEBUG *)-1)
+  {
+    name = cs->DebugInfo->Spare[0];
+  }
+  if (name)
+  {
+    printf("Entering critical section: %s, TID: %lu\n", (const char *)name, (unsigned long)pthread_self());
+  }
+  pthread_mutex_lock(&cs->mutex);
+}
+
+void LeaveCriticalSection(CRITICAL_SECTION *cs)
+{
+  if (!cs)
+    return;
+  DWORD_PTR name = 0;
+  if (cs->DebugInfo != (RTL_CRITICAL_SECTION_DEBUG *)-1)
+  {
+    name = cs->DebugInfo->Spare[0];
+  }
+  if (name)
+  {
+    printf("Leaving critical section: %s\n", (const char *)name);
+  }
+  pthread_mutex_unlock(&cs->mutex);
+}
+
+void DeleteCriticalSection(CRITICAL_SECTION *cs)
+{
+  pthread_mutex_destroy(&cs->mutex);
+}
 
 HANDLE CreateEventW(SECURITY_ATTRIBUTES *lpEventAttributes, BOOL bManualReset, BOOL bInitialState, LPCWSTR lpName)
 {

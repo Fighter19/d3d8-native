@@ -490,6 +490,8 @@ static BOOL wined3d_dll_init(HINSTANCE hInstDLL)
 
     // vkd3d_utils_set_log_callback(vkd3d_log_callback);
 
+    wined3d_lock_init(&wined3d_cs, "Main wined3d mutex");
+
     return TRUE;
 }
 

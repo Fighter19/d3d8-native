@@ -1,5 +1,10 @@
 #pragma once
 
+#define _GNU_SOURCE
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 typedef struct _LIST_ENTRY {
   struct _LIST_ENTRY *Flink;
   struct _LIST_ENTRY *Blink;
@@ -32,31 +37,10 @@ typedef RTL_CRITICAL_SECTION_DEBUG CRITICAL_SECTION_DEBUG;
 
 #define RTL_CRITICAL_SECTION_FLAG_FORCE_DEBUG_INFO 0x01000000
 
-static BOOL InitializeCriticalSectionEx(CRITICAL_SECTION *cs, DWORD spincount, DWORD flags)
-{
-  pthread_mutexattr_t attr;
-  pthread_mutexattr_init(&attr);
-  pthread_mutex_init(&cs->mutex, &attr);
-  pthread_mutexattr_destroy(&attr);
-
-  cs->DebugInfo = (RTL_CRITICAL_SECTION_DEBUG *)-1;
-  return TRUE;
-}
-
-static inline void EnterCriticalSection(CRITICAL_SECTION *cs)
-{
-  pthread_mutex_lock(&cs->mutex);
-}
-
-static inline void LeaveCriticalSection(CRITICAL_SECTION *cs)
-{
-  pthread_mutex_unlock(&cs->mutex);
-}
-
-static inline void DeleteCriticalSection(CRITICAL_SECTION *cs)
-{
-  pthread_mutex_destroy(&cs->mutex);
-}
+BOOL InitializeCriticalSectionEx(CRITICAL_SECTION *cs, DWORD spincount, DWORD flags);
+void EnterCriticalSection(CRITICAL_SECTION *cs);
+void LeaveCriticalSection(CRITICAL_SECTION *cs);
+void DeleteCriticalSection(CRITICAL_SECTION *cs);
 
 BOOL SetEvent(HANDLE hEvent);
 DWORD WaitForSingleObject(HANDLE hHandle, DWORD dwMilliseconds);
