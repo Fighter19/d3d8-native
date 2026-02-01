@@ -41,7 +41,9 @@ void *_recalloc(void *ptr, size_t num, size_t size)
   ptr = realloc(ptr, num * size);
   if (!ptr)
     return NULL;
-  // Zero the new memory
-  memset((char *)ptr, 0, num * size);
+  // Only the new memory needs to be zeroed, however we don't have the old size here
+  // so it can't be zeroed without destroying existing data.
+  // Requires custom allocator to track sizes.
+  // Skip for now.
   return ptr;
 }
