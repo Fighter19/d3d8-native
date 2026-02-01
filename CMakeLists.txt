@@ -134,6 +134,7 @@ target_link_libraries(vkd3d-shader PRIVATE compat)
 target_link_libraries(wined3d PRIVATE vkd3d-shader compat)
 
 set(D3D8_NATIVE_SOURCES
+    buffer.c
     d3d8_main.c
     device.c
     directx.c
