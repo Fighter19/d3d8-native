@@ -31,7 +31,7 @@ PROC GetProcAddress(HMODULE hModule, LPCSTR lpProcName)
     }
 
     void *ptr = SDL_GL_GetProcAddress(lpProcName);
-    printf("GetProcAddress: %s -> %p\n", lpProcName, ptr);
+    // printf("GetProcAddress: %s -> %p\n", lpProcName, ptr);
     if (!ptr)
     {
       printf("GetProcAddress: %s not found in SDL OpenGL library\n", lpProcName);
