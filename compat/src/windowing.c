@@ -3,6 +3,10 @@
 #include "ntstatus.h"
 #include "ddk/d3dkmthk.h"
 
+#include <SDL3/SDL.h>
+
+#pragma clang optimize off
+
 BOOL IsWindow(HWND hWnd)
 {
   return 0;
@@ -88,8 +92,56 @@ BOOL EnumDisplayDevicesW(
     PDISPLAY_DEVICEW lpDisplayDevice,
     DWORD dwFlags)
 {
-  STUBBED();
-  return FALSE;
+  if (lpDevice != 0)
+    return FALSE;
+
+  // This is one of the first functions, as such SDL needs to be initialized here
+  if (SDL_WasInit(SDL_INIT_VIDEO) == 0)
+  {
+    if (!SDL_InitSubSystem(SDL_INIT_VIDEO))
+    {
+      fprintf(stderr, "EnumDisplayDevicesW: Failed to initialize SDL video subsystem: %s\n", SDL_GetError());
+      return FALSE;
+    }
+  }
+  
+  // Collect all display devices via SDL
+  int numDisplays = 0;
+  SDL_DisplayID *displays = SDL_GetDisplays(&numDisplays);
+  if (!displays)
+  {
+    fprintf(stderr, "EnumDisplayDevicesW: SDL_GetDisplays failed: %s\n", SDL_GetError());
+    return FALSE;
+  }
+
+  if (iDevNum >= (DWORD)numDisplays)
+  {
+    SDL_free(displays);
+    return FALSE;
+  }
+
+  DISPLAY_DEVICEW *device = lpDisplayDevice;
+  SDL_DisplayID display = displays[iDevNum];
+  if (device->cb < sizeof(DISPLAY_DEVICEW))
+  {
+    SDL_free(displays);
+    fprintf(stderr, "EnumDisplayDevicesW: DISPLAY_DEVICEW size is too small\n");
+    return FALSE;
+  }
+
+  // Fill in the DISPLAY_DEVICEW structure
+  ZeroMemory(device, sizeof(DISPLAY_DEVICEW));
+  device->cb = sizeof(DISPLAY_DEVICEW);
+  const char *name = SDL_GetDisplayName(display);
+  mbsrtowcs(device->DeviceName, &name, 32, NULL);
+  // For DeviceString, we can use the same as DeviceName for now
+  name = SDL_GetDisplayName(display);
+  mbsrtowcs(device->DeviceString, &name, 128, NULL);
+  // DISPLAY_DEVICE_PRIMARY_DEVICE is considered by wined3d but not set for now
+  device->StateFlags = DISPLAY_DEVICE_ATTACHED_TO_DESKTOP;
+
+  SDL_free(displays);
+  return TRUE;
 }
 
 BOOL EnumDisplaySettingsW(LPCWSTR lpszDeviceName, DWORD iModeNum, LPDEVMODEW lpDevMode)
@@ -100,8 +152,77 @@ BOOL EnumDisplaySettingsW(LPCWSTR lpszDeviceName, DWORD iModeNum, LPDEVMODEW lpD
 
 BOOL EnumDisplaySettingsExW(LPCWSTR lpszDeviceName, DWORD iModeNum, LPDEVMODEW lpDevMode, DWORD dwFlags)
 {
-  STUBBED();
-  return 0;
+  if (lpDevMode == NULL)
+    return FALSE;
+  if (lpDevMode->dmSize < sizeof(DEVMODEW))
+    return FALSE;
+
+  lpDevMode->dmSize = sizeof(DEVMODEW);
+
+  // TODO: Match lpszDeviceName to the correct display
+  int numDisplays = 0;
+  SDL_DisplayID *displays = SDL_GetDisplays(&numDisplays);
+  if (!displays)
+  {
+    fprintf(stderr, "EnumDisplaySettingsExW: SDL_GetDisplays failed: %s\n", SDL_GetError());
+    return FALSE;
+  }
+
+  if (displays[0] == 0)
+  {
+    fprintf(stderr, "EnumDisplaySettingsExW: No displays found\n");
+    SDL_free(displays);
+    return FALSE;
+  }
+
+  
+
+  int numDisplayModes = 0;
+  const SDL_DisplayMode **displayModes = NULL;
+  const SDL_DisplayMode *currentMode = NULL;
+  if (iModeNum == ENUM_CURRENT_SETTINGS)
+  {
+    numDisplayModes = 1;
+    currentMode = SDL_GetCurrentDisplayMode(displays[0]);
+    if (currentMode == NULL)
+    {
+      fprintf(stderr, "EnumDisplaySettingsExW: SDL_GetCurrentDisplayMode failed: %s\n", SDL_GetError());
+      SDL_free(displays);
+      return FALSE;
+    }
+  }
+  else
+  {
+    displayModes = (const SDL_DisplayMode**)SDL_GetFullscreenDisplayModes(displays[0], &numDisplayModes);
+    if (displayModes == NULL)
+    {
+      fprintf(stderr, "EnumDisplaySettingsExW: SDL_GetFullscreenDisplayModes failed: %s\n", SDL_GetError());
+      SDL_free(displays);
+      return FALSE;
+    }
+  }
+
+  if (iModeNum >= (DWORD)numDisplayModes && iModeNum != ENUM_CURRENT_SETTINGS)
+  {
+    fprintf(stderr, "EnumDisplaySettingsExW: Requested mode %u out of range (%d modes available)\n", iModeNum, numDisplayModes);
+    SDL_free(displayModes);
+    SDL_free(displays);
+    return FALSE;
+  }
+
+  const SDL_DisplayMode *mode = NULL;
+  if (iModeNum == ENUM_CURRENT_SETTINGS)
+    mode = currentMode;
+  else
+    mode = displayModes[iModeNum];
+  lpDevMode->dmPelsWidth = mode->w;
+  lpDevMode->dmPelsHeight = mode->h;
+  lpDevMode->dmBitsPerPel = SDL_BITSPERPIXEL(mode->format);
+  lpDevMode->dmDisplayFrequency = mode->refresh_rate;
+  lpDevMode->dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL | DM_DISPLAYFREQUENCY;
+  SDL_free(displayModes);
+  SDL_free(displays);
+  return TRUE;
 }
 
 LONG ChangeDisplaySettingsExW(LPCWSTR lpszDeviceName, LPDEVMODEW lpDevMode, HWND hwnd, DWORD dwflags, LPVOID lParam)
@@ -351,13 +472,13 @@ BOOL DeleteObject(HGDIOBJ hObject)
 BOOL RegisterClassA(const WNDCLASSA *lpWndClass)
 {
   STUBBED();
-  return FALSE;
+  return TRUE;
 }
 
 BOOL UnregisterClassA(LPCSTR lpClassName, HINSTANCE hInstance)
 {
   STUBBED();
-  return FALSE;
+  return TRUE;
 }
 
 BOOL SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags)
