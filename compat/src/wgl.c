@@ -31,6 +31,7 @@ HGLRC wglCreateContext(HDC hdc)
   if (sdlGlContext == NULL)
   {
     assert(false && "SDL_GL_CreateContext failed in wglCreateContext");
+    fprintf(stderr, "SDL_GL_CreateContext failed: %s\n", SDL_GetError());
     return NULL;
   }
 
@@ -144,11 +145,12 @@ HWND GetDesktopWindow(void)
 
 HWND WindowFromDC(HDC dc)
 {
-  // This function will return the SDL_Window* later
-  // Retrieves a handle to the window associated with the specified device context (DC)
-  assert(false && "WindowFromDC is not implemented yet");
-
-  return NULL;
+  if (!dc)
+  {
+    assert(false && "Invalid HDC in WindowFromDC");
+    return NULL;
+  }
+  return (HWND)(dc->window);
 }
 
 HDC GetDC(HWND hWnd)
@@ -168,10 +170,9 @@ HDC GetDC(HWND hWnd)
 
 HDC GetDCEx(HWND hWnd, HRGN hrgnClip, DWORD flags)
 {
-  // Retrieves a handle to a device context (DC) for the client area of a specified window or for the entire screen with additional options
-  assert(false && "GetDCEx is not implemented yet");
-
-  return NULL;
+  // Theoretically, the hrgnClip and flags parameters can be used to control the clipping region of the device context
+  // We don't do that here for simplicity
+  return GetDC(hWnd);
 }
 
 HWND CreateWindowA(
@@ -222,8 +223,13 @@ BOOL GetClientRect(HWND hWnd, LPRECT lpRect)
 
 void DestroyWindow(HWND hWnd)
 {
-  // Destroys the specified window
-  assert(false && "DestroyWindow is not implemented yet");
+  if (!hWnd)
+  {
+    assert(false && "Invalid HWND in DestroyWindow");
+    return;
+  }
+  SDL_Window *window = (SDL_Window *)hWnd;
+  SDL_DestroyWindow(window);
 }
 
 INT ReleaseDC(HWND hWnd, HDC hDC)
