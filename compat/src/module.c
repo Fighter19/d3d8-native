@@ -15,6 +15,14 @@ PROC GetProcAddress(HMODULE hModule, LPCSTR lpProcName)
 {
   if (hModule->bIsSDLOpenGL)
   {
+    if (strcmp(lpProcName, "wglGetPixelFormat") == 0)
+    {
+      // Special case for wglGetPixelFormat
+      printf("GetProcAddress: %s -> special case handler\n", lpProcName);
+      // Same protoype as GetPixelFormat
+      return (PROC)GetPixelFormat;
+    }
+
     // If the string starts with "wgl", return NULL to indicate unsupported wgl extensions
     if (strncmp(lpProcName, "wgl", 3) == 0)
     {
