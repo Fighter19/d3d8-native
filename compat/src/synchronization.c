@@ -43,7 +43,7 @@ void EnterCriticalSection(CRITICAL_SECTION *cs)
   }
   if (name)
   {
-    printf("Entering critical section: %s, TID: %lu\n", (const char *)name, (unsigned long)pthread_self());
+    // printf("Entering critical section: %s, TID: %lu\n", (const char *)name, (unsigned long)pthread_self());
   }
   pthread_mutex_lock(&cs->mutex);
 }
@@ -59,7 +59,7 @@ void LeaveCriticalSection(CRITICAL_SECTION *cs)
   }
   if (name)
   {
-    printf("Leaving critical section: %s\n", (const char *)name);
+    // printf("Leaving critical section: %s\n", (const char *)name);
   }
   pthread_mutex_unlock(&cs->mutex);
 }
