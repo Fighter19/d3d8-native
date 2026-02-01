@@ -11,6 +11,8 @@ typedef struct HMODULE__ {
 static MODULE s_sdlOpenGLModule = { .bIsSDLOpenGL = true };
 HMODULE g_sdlOpenGLModule = &s_sdlOpenGLModule;
 
+BOOL wglSwapBuffers(HDC hdc);
+
 PROC GetProcAddress(HMODULE hModule, LPCSTR lpProcName)
 {
   if (hModule->bIsSDLOpenGL)
@@ -21,6 +23,13 @@ PROC GetProcAddress(HMODULE hModule, LPCSTR lpProcName)
       printf("GetProcAddress: %s -> special case handler\n", lpProcName);
       // Same protoype as GetPixelFormat
       return (PROC)GetPixelFormat;
+    }
+
+    if (strcmp(lpProcName, "wglSwapBuffers") == 0)
+    {
+      // Special case for wglSwapBuffers
+      printf("GetProcAddress: %s -> special case handler\n", lpProcName);
+      return (PROC)wglSwapBuffers;
     }
 
     // If the string starts with "wgl", return NULL to indicate unsupported wgl extensions

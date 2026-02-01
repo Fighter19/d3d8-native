@@ -40,6 +40,17 @@ HGLRC wglCreateContext(HDC hdc)
   return hglrc;
 }
 
+BOOL wglSwapBuffers(HDC hdc)
+{
+  if (SDL_GL_SwapWindow((SDL_Window *)hdc->window) != 0)
+  {
+    printf("SDL_GL_SwapWindow failed in wglSwapBuffers: %s\n", SDL_GetError());
+    assert(false && "SDL_GL_SwapWindow failed in wglSwapBuffers");
+    return FALSE;
+  }
+  return TRUE;
+}
+
 BOOL wglMakeCurrent(HDC hdc, HGLRC hglrc)
 {
   SDL_Window *currentWindow = NULL;
