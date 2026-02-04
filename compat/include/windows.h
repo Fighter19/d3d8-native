@@ -289,6 +289,9 @@ typedef struct _LAYERPLANEDESCRIPTOR LAYERPLANEDESCRIPTOR;
 #define CALLBACK
 #define WINAPI
 #define STDAPI HRESULT STDMETHODCALLTYPE
+#if !defined (__x86_64__) && !defined(__i386__)
+#define __cdecl
+#endif
 #define CDECL __cdecl
 
 #define FIELD_OFFSET(type, field)    (LONG)offsetof(type, field)
