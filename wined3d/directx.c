@@ -144,12 +144,15 @@ static HRESULT wined3d_output_init(struct wined3d_output *output, unsigned int o
     if (D3DKMTCreateDevice(&create_device_desc))
         return E_FAIL;
 
+    memset(output, 0, sizeof(*output));
     output->ordinal = ordinal;
     lstrcpyW(output->device_name, device_name);
     output->adapter = adapter;
     output->screen_format = WINED3DFMT_UNKNOWN;
     output->kmt_device = create_device_desc.hDevice;
     output->vidpn_source_id = open_adapter_desc.VidPnSourceId;
+    output->modes = NULL;
+    output->modes_valid = false;
 
     return WINED3D_OK;
 }

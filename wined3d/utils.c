@@ -6615,7 +6615,11 @@ BOOL wined3d_array_reserve(void **elements, SIZE_T *capacity, SIZE_T count, SIZE
     if (new_capacity < count)
         new_capacity = count;
 
+#ifndef _WIN32
+    new_elements = realloc(*elements, new_capacity * size);
+#else
     new_elements = _recalloc(*elements, new_capacity, size);
+#endif
     if (!new_elements)
         return FALSE;
 

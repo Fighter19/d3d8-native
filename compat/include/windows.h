@@ -531,8 +531,6 @@ static inline bool lstrcmpiW(LPCWSTR str1, LPCWSTR str2)
     return *str1 - *str2;
 }
 
-void *_recalloc(void *ptr, size_t num, size_t size);
-
 #define MAKEINTRESOURCEA(i) (LPSTR)((ULONG_PTR)((WORD)(i)))
 #define MAKEINTRESOURCEW(i) (LPWSTR)((ULONG_PTR)((WORD)(i)))
 #define MAKEINTRESOURCE(i)  MAKEINTRESOURCEA(i)

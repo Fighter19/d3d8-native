@@ -31,19 +31,3 @@ BOOL HeapFree(LPVOID hHeap, DWORD dwFlags, LPVOID lpMem)
   STUBBED();
   return FALSE;
 }
-
-void *_recalloc(void *ptr, size_t num, size_t size)
-{
-  // TODO: Untested
-  STUBBED();
-  // reallocarray could be used, but we will need to multiply anyway
-  // to zero the new memory, so an overflow check would be appropriate here
-  ptr = realloc(ptr, num * size);
-  if (!ptr)
-    return NULL;
-  // Only the new memory needs to be zeroed, however we don't have the old size here
-  // so it can't be zeroed without destroying existing data.
-  // Requires custom allocator to track sizes.
-  // Skip for now.
-  return ptr;
-}
