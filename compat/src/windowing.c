@@ -96,7 +96,7 @@ BOOL EnumDisplayDevicesW(
     return FALSE;
 
   // This is one of the first functions, as such SDL needs to be initialized here
-  if (SDL_WasInit(SDL_INIT_VIDEO) == 0)
+  if (!SDL_WasInit(SDL_INIT_VIDEO))
   {
     if (!SDL_InitSubSystem(SDL_INIT_VIDEO))
     {
