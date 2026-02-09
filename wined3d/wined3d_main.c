@@ -24,7 +24,9 @@
 
 #define VKD3D_NO_VULKAN_H
 #define VKD3D_NO_WIN32_TYPES
-#include "initguid.h"
+// Actual main is wined3d_main.c, don't use initguid.h as to not violate ODR,
+// when linking statically.
+#include "guiddef.h"
 #include "wined3d_private.h"
 #include "wined3d_gl.h"
 #define VK_NO_PROTOTYPES
