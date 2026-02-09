@@ -9,7 +9,7 @@ static inline VOID NtDelayExecution(BOOL Alertable, const LARGE_INTEGER *DelayIn
   nanosleep(&ts, NULL);
 }
 
-typedef pthread_t THREAD_ID;
+typedef DWORD THREAD_ID;
 static inline THREAD_ID GetCurrentThreadId()
 {
 	pthread_t thread_id = pthread_self();
