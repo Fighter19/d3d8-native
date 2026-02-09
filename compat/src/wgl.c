@@ -43,7 +43,7 @@ HGLRC wglCreateContext(HDC hdc)
 
 BOOL wglSwapBuffers(HDC hdc)
 {
-  if (SDL_GL_SwapWindow((SDL_Window *)hdc->window) != 0)
+  if (!SDL_GL_SwapWindow((SDL_Window *)hdc->window))
   {
     printf("SDL_GL_SwapWindow failed in wglSwapBuffers: %s\n", SDL_GetError());
     assert(false && "SDL_GL_SwapWindow failed in wglSwapBuffers");
