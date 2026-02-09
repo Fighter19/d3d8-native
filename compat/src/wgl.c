@@ -24,6 +24,9 @@ typedef struct HGLRC__ {
   SDL_GLContext sdlGlContext;
 } GLRC, *HGLRC;
 
+static HDC s_pCurrentDC = {0};
+static HGLRC s_pCurrentGLRC = {0};
+
 
 HGLRC wglCreateContext(HDC hdc)
 {
@@ -102,23 +105,19 @@ BOOL wglMakeCurrent(HDC hdc, HGLRC hglrc)
     assert(false && "SDL_GL_MakeCurrent failed in wglMakeCurrent");
     return FALSE;
   }
+  s_pCurrentDC = hdc;
+  s_pCurrentGLRC = hglrc;
   return TRUE;
 }
 
 HDC wglGetCurrentDC(void)
 {
-  // Retrieves a handle to the device context that is associated with the calling thread's current OpenGL rendering context
-  assert(false && "wglGetCurrentDC is not implemented yet");
-
-  return NULL;
+  return s_pCurrentDC;
 }
 
 HGLRC wglGetCurrentContext(void)
 {
-  // Retrieves a handle to the calling thread's current OpenGL rendering context
-  assert(false && "wglGetCurrentContext is not implemented yet");
-
-  return NULL;
+  return s_pCurrentGLRC;
 }
 
 BOOL wglDeleteContext(HGLRC hglrc)
@@ -126,6 +125,8 @@ BOOL wglDeleteContext(HGLRC hglrc)
   SDL_GLContext sdlGlContext = hglrc->sdlGlContext;
   SDL_GL_DestroyContext(sdlGlContext);
   free(hglrc);
+  if (s_pCurrentGLRC == hglrc)
+    s_pCurrentGLRC = NULL;
   return TRUE;
 }
 
@@ -189,6 +190,33 @@ HWND CreateWindowA(
   LPVOID               lpParam
 )
 {
+#ifdef EMSCRIPTEN
+  // Multiple windows are currently not supported in the Emscripten,
+  // use existing window if it exists, otherwise fail.
+  int count = 0;
+  SDL_Window **windows = SDL_GetWindows(&count);
+  if (count > 1)
+  {
+    assert(false && "I thought, multiple windows are not supported in Emscripten, fix pls");
+    return NULL;
+  }
+  if (count < 1)
+  {
+    assert(false && "No window exists in Emscripten, but CreateWindowA was called, fix pls");
+    return NULL;
+  }
+  if (windows == NULL)
+  {
+    assert(false && "SDL_GetWindows returned NULL in CreateWindowA, can't map to existing window");
+    return NULL;
+  }
+  SDL_Window *window = windows[0];
+  if (!window)
+  {
+    assert(false && "Window needs to exist before CreateWindowA is called, when using Emscripten");
+  }
+  return (HWND)window;
+#else
   SDL_Window *window = SDL_CreateWindow(lpWindowName,
                                         nWidth,
                                         nHeight,
@@ -199,6 +227,7 @@ HWND CreateWindowA(
     return NULL;
   }
   return (HWND)window;
+#endif
 }
 
 BOOL GetClientRect(HWND hWnd, LPRECT lpRect)
@@ -223,6 +252,10 @@ BOOL GetClientRect(HWND hWnd, LPRECT lpRect)
 
 void DestroyWindow(HWND hWnd)
 {
+#ifdef EMSCRIPTEN
+  // Don't actually destroy the window in Emscripten, since we only support one window
+  return;
+#else
   if (!hWnd)
   {
     assert(false && "Invalid HWND in DestroyWindow");
@@ -230,6 +263,7 @@ void DestroyWindow(HWND hWnd)
   }
   SDL_Window *window = (SDL_Window *)hWnd;
   SDL_DestroyWindow(window);
+#endif
 }
 
 INT ReleaseDC(HWND hWnd, HDC hDC)
@@ -251,6 +285,8 @@ INT ReleaseDC(HWND hWnd, HDC hDC)
     return FALSE;
   }
   free(hDC);
+  if (s_pCurrentDC == hDC)
+    s_pCurrentDC = NULL;
   return TRUE;
 }
 
