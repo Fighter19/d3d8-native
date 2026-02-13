@@ -180,23 +180,29 @@ BOOL EnumDisplaySettingsExW(LPCWSTR lpszDeviceName, DWORD iModeNum, LPDEVMODEW l
   int numDisplayModes = 0;
   const SDL_DisplayMode **displayModes = NULL;
   const SDL_DisplayMode *currentMode = NULL;
-  if (iModeNum == ENUM_CURRENT_SETTINGS)
-  {
-    numDisplayModes = 1;
-    currentMode = SDL_GetCurrentDisplayMode(displays[0]);
-    if (currentMode == NULL)
-    {
-      fprintf(stderr, "EnumDisplaySettingsExW: SDL_GetCurrentDisplayMode failed: %s\n", SDL_GetError());
-      SDL_free(displays);
-      return FALSE;
-    }
-  }
-  else
+
+  if (iModeNum != ENUM_CURRENT_SETTINGS)
   {
     displayModes = (const SDL_DisplayMode**)SDL_GetFullscreenDisplayModes(displays[0], &numDisplayModes);
     if (displayModes == NULL)
     {
       fprintf(stderr, "EnumDisplaySettingsExW: SDL_GetFullscreenDisplayModes failed: %s\n", SDL_GetError());
+      SDL_free(displays);
+      return FALSE;
+    }
+  }
+
+  if (iModeNum == ENUM_CURRENT_SETTINGS || numDisplayModes == 0)
+  {
+    if (numDisplayModes == 0)
+    {
+      fprintf(stderr, "EnumDisplaySettingsExW: No display modes found, falling back to current display mode\n");
+    }
+    numDisplayModes = 1;
+    currentMode = SDL_GetCurrentDisplayMode(displays[0]);
+    if (currentMode == NULL)
+    {
+      fprintf(stderr, "EnumDisplaySettingsExW: SDL_GetCurrentDisplayMode failed: %s\n", SDL_GetError());
       SDL_free(displays);
       return FALSE;
     }
@@ -211,14 +217,15 @@ BOOL EnumDisplaySettingsExW(LPCWSTR lpszDeviceName, DWORD iModeNum, LPDEVMODEW l
   }
 
   const SDL_DisplayMode *mode = NULL;
-  if (iModeNum == ENUM_CURRENT_SETTINGS)
+  // Either requested through ENUM_CURRENT_SETTINGS or selected as fallback
+  if (currentMode != NULL)
     mode = currentMode;
   else
     mode = displayModes[iModeNum];
   lpDevMode->dmPelsWidth = mode->w;
   lpDevMode->dmPelsHeight = mode->h;
   lpDevMode->dmBitsPerPel = SDL_BITSPERPIXEL(mode->format);
-  lpDevMode->dmDisplayFrequency = mode->refresh_rate;
+  lpDevMode->dmDisplayFrequency = mode->refresh_rate ? mode->refresh_rate : 60; // SDL may return 0 for some modes, in that case we can default to 60Hz
   lpDevMode->dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL | DM_DISPLAYFREQUENCY;
   SDL_free(displayModes);
   SDL_free(displays);
