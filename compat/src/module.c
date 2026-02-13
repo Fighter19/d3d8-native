@@ -3,6 +3,18 @@
 #include <strings.h>
 #include <SDL3/SDL.h>
 
+#ifdef GL4ES
+#ifndef APIENTRY_GL4ES
+  #ifdef _WIN32
+    #define APIENTRY_GL4ES __stdcall
+  #else
+    #define APIENTRY_GL4ES
+  #endif
+#endif
+
+void *APIENTRY_GL4ES gl4es_GetProcAddress(const char *proc);
+#endif
+
 typedef struct HMODULE__ {
   bool bIsSDLOpenGL;
   void *handle;
@@ -39,7 +51,11 @@ PROC GetProcAddress(HMODULE hModule, LPCSTR lpProcName)
       return NULL;
     }
 
+#ifdef GL4ES
+    void *ptr = gl4es_GetProcAddress(lpProcName);
+#else
     void *ptr = SDL_GL_GetProcAddress(lpProcName);
+#endif
     // printf("GetProcAddress: %s -> %p\n", lpProcName, ptr);
     if (!ptr)
     {

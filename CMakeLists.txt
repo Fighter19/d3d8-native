@@ -1,6 +1,24 @@
 cmake_minimum_required(VERSION 3.20)
 project(wined3d8-native)
 
+option(D3D8_USE_GL4ES "Use GL4ES for OpenGL ES emulation" ON)
+
+if(D3D8_USE_GL4ES)
+    if (EMSCRIPTEN)
+        # Don't cache these options, in Emscripten's case
+        cmake_policy(SET CMP0077 NEW)
+        message(STATUS "Setting Emscripten defaults for GL4ES")
+        set(NOX11 ON)
+        set(NOEGL ON)
+        set(STATICLIB ON)
+    endif()
+    FetchContent_Declare(
+        gl4es
+        GIT_REPOSITORY https://github.com/ptitSeb/gl4es.git
+        GIT_TAG        1d69dd6a9867f8c2a9592e035ba00090f74071d7)
+    FetchContent_MakeAvailable(gl4es)
+endif()
+
 set(WINED3D8_SOURCES
     buffer.c
     d3d8_main.c
@@ -68,7 +86,14 @@ list(TRANSFORM COMPAT_SOURCES PREPEND compat/src/)
 
 add_library(compat SHARED ${COMPAT_SOURCES})
 find_package(SDL3 CONFIG REQUIRED)
-target_link_libraries(compat PRIVATE SDL3::SDL3 EGL GLESv2)
+target_link_libraries(compat PRIVATE SDL3::SDL3 EGL)
+if(D3D8_USE_GL4ES)
+    # GL is defined by GL4ES, if not using GL4ES, pick system GLES instead
+    target_link_libraries(compat PRIVATE GL)
+    target_compile_definitions(compat PRIVATE -DGL4ES)
+else()
+    target_link_libraries(compat PRIVATE GLESv2)
+endif()
 
 target_include_directories(compat PUBLIC include compat/include)
 
