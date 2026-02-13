@@ -1359,14 +1359,18 @@ unsigned int CDECL wined3d_output_get_mode_count(struct wined3d_output *output,
     format = wined3d_get_format(adapter, format_id, WINED3D_BIND_RENDER_TARGET);
 
     wined3d_output_update_modes(output, cached);
+    printf("Total modes: %d\n", (int)output->mode_count);
 
     for (i = 0; i < output->mode_count; ++i)
     {
+        printf("Mode %d: %ux%u@%u\n", (int)i, output->modes[i].width, output->modes[i].height,
+                output->modes[i].refresh_rate);
         if (mode_matches_filter(adapter, &output->modes[i], format, scanline_ordering))
             ++count;
     }
 
     TRACE("Returning %u matching modes (out of %Iu total).\n", count, output->mode_count);
+    printf("Returning %u matching modes (out of %d total).\n", count, (int)output->mode_count);
 
     return count;
 }
