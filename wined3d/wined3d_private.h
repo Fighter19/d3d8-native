@@ -35,7 +35,6 @@
 #define LIBVKD3D_SHADER_SOURCE
 #include <vkd3d_shader.h>
 #include "ntstatus.h"
-#define WIN32_NO_STATUS
 #define COBJMACROS
 #include "windef.h"
 #include "winbase.h"
@@ -2072,7 +2071,6 @@ extern const struct wined3d_light WINED3D_default_light;
 
 struct wined3d_pixel_format
 {
-    int iPixelFormat; /* WGL pixel format */
     int iPixelType; /* WGL pixel type e.g. WGL_TYPE_RGBA_ARB, WGL_TYPE_RGBA_FLOAT_ARB or WGL_TYPE_COLORINDEX_ARB */
     int redSize, greenSize, blueSize, alphaSize, colorSize;
     int depthSize, stencilSize;
@@ -2326,6 +2324,7 @@ enum wined3d_pci_device
     CARD_NVIDIA_GEFORCE_RTX3090TI   = 0x2203,
     CARD_NVIDIA_TESLA_T4            = 0x1eb8,
     CARD_NVIDIA_AMPERE_A10          = 0x2236,
+    CARD_NVIDIA_AMPERE_A10G         = 0x2237,
     CARD_NVIDIA_GEFORCE_RTX4060     = 0x2882,
     CARD_NVIDIA_GEFORCE_RTX4060M    = 0x28a0,
     CARD_NVIDIA_GEFORCE_RTX4060TI8G = 0x2803,
@@ -2415,7 +2414,8 @@ enum wined3d_pci_device
     CARD_INTEL_IPP580_1             = 0x193a,
     CARD_INTEL_IPP580_2             = 0x193d,
     CARD_INTEL_UHD617               = 0x87c0,
-    CARD_INTEL_UHD620               = 0x3ea0,
+    CARD_INTEL_UHD620_1             = 0x3ea0,
+    CARD_INTEL_UHD620_2             = 0x5917,
     CARD_INTEL_HD615                = 0x591e,
     CARD_INTEL_HD620                = 0x5916,
     CARD_INTEL_HD630_1              = 0x5912,
@@ -4547,6 +4547,7 @@ extern enum wined3d_format_id pixelformat_for_depth(DWORD depth);
 #define WINED3D_FORMAT_ATTR_CAST_TO_BLOCK           0x00000800
 #define WINED3D_FORMAT_ATTR_PLANAR                  0x00001000
 #define WINED3D_FORMAT_ATTR_SHADOW                  0x00002000
+#define WINED3D_FORMAT_ATTR_UNSIGNED                0x00004000
 
 /* Pixel format capabilities */
 #define WINED3D_FORMAT_CAP_POSTPIXELSHADER_BLENDING     0x00000001

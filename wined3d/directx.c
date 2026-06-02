@@ -153,6 +153,7 @@ static HRESULT wined3d_output_init(struct wined3d_output *output, unsigned int o
     output->vidpn_source_id = open_adapter_desc.VidPnSourceId;
     output->modes = NULL;
     output->modes_valid = false;
+    output->mode_count = 0;
 
     return WINED3D_OK;
 }
@@ -501,6 +502,7 @@ static const struct wined3d_gpu_description gpu_description_table[] =
     {HW_VENDOR_NVIDIA,     CARD_NVIDIA_GEFORCE_RTX3090TI,  "NVIDIA GeForce RTX 3090 Ti",       DRIVER_NVIDIA_KEPLER,  24576},
     {HW_VENDOR_NVIDIA,     CARD_NVIDIA_TESLA_T4,           "NVIDIA Tesla T4",                  DRIVER_NVIDIA_KEPLER,  16384},
     {HW_VENDOR_NVIDIA,     CARD_NVIDIA_AMPERE_A10,         "NVIDIA Ampere A10",                DRIVER_NVIDIA_KEPLER,  24576},
+    {HW_VENDOR_NVIDIA,     CARD_NVIDIA_AMPERE_A10G,        "NVIDIA A10G",                      DRIVER_NVIDIA_KEPLER,  24564},
     {HW_VENDOR_NVIDIA,     CARD_NVIDIA_GEFORCE_RTX4060,    "NVIDIA GeForce RTX 4060",          DRIVER_NVIDIA_KEPLER,  8192},
     {HW_VENDOR_NVIDIA,     CARD_NVIDIA_GEFORCE_RTX4060M,   "NVIDIA GeForce RTX 4060M",         DRIVER_NVIDIA_KEPLER,  8192},
     {HW_VENDOR_NVIDIA,     CARD_NVIDIA_GEFORCE_RTX4060TI8G, "NVIDIA GeForce RTX 4060 Ti 8GB",  DRIVER_NVIDIA_KEPLER,  8192},
@@ -660,7 +662,8 @@ static const struct wined3d_gpu_description gpu_description_table[] =
     {HW_VENDOR_INTEL,      CARD_INTEL_IPP580_1,            "Intel(R) Iris(TM) Pro Graphics P580",                       DRIVER_INTEL_HD4000,  2048},
     {HW_VENDOR_INTEL,      CARD_INTEL_IPP580_2,            "Intel(R) Iris(TM) Pro Graphics P580",                       DRIVER_INTEL_HD4000,  2048},
     {HW_VENDOR_INTEL,      CARD_INTEL_UHD617,              "Intel(R) UHD Graphics 617",                                 DRIVER_INTEL_HD4000,  2048},
-    {HW_VENDOR_INTEL,      CARD_INTEL_UHD620,              "Intel(R) UHD Graphics 620",                                 DRIVER_INTEL_HD4000,  3072},
+    {HW_VENDOR_INTEL,      CARD_INTEL_UHD620_1,            "Intel(R) UHD Graphics 620",                                 DRIVER_INTEL_HD4000,  3072},
+    {HW_VENDOR_INTEL,      CARD_INTEL_UHD620_2,            "Intel(R) UHD Graphics 620",                                 DRIVER_INTEL_HD4000,  3072},
     {HW_VENDOR_INTEL,      CARD_INTEL_HD615,               "Intel(R) HD Graphics 615",                                  DRIVER_INTEL_HD4000,  2048},
     {HW_VENDOR_INTEL,      CARD_INTEL_HD620,               "Intel(R) HD Graphics 620",                                  DRIVER_INTEL_HD4000,  3072},
     {HW_VENDOR_INTEL,      CARD_INTEL_HD630_1,             "Intel(R) HD Graphics 630",                                  DRIVER_INTEL_HD4000,  3072},
@@ -3486,6 +3489,9 @@ static struct wined3d_adapter *wined3d_adapter_create(unsigned int ordinal, DWOR
 {
     if (wined3d_creation_flags & WINED3D_NO3D)
         return wined3d_adapter_no3d_create(ordinal, wined3d_creation_flags);
+
+    if (wined3d_settings.renderer == WINED3D_RENDERER_VULKAN)
+        return wined3d_adapter_vk_create(ordinal, wined3d_creation_flags);
 
     return wined3d_adapter_gl_create(ordinal, wined3d_creation_flags);
 }

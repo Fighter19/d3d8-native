@@ -4,20 +4,6 @@
 
 #include "private/vkd3d_common.h"
 
-enum vkd3d_dbg_level vkd3d_dbg_get_level(const char *env_name)
-{
-  return VKD3D_DBG_LEVEL_TRACE;
-}
-
-void vkd3d_dbg_printf(const char *vkd3d_dbg_env_name, enum vkd3d_dbg_level level,
-                      const char *function, const char *fmt, ...)
-{
-  va_list args;
-  va_start(args, fmt);
-  vprintf(fmt, args);
-  va_end(args);
-}
-
 void vkd3d_dbg_set_log_callback(PFN_vkd3d_log callback)
 {
   STUBBED();

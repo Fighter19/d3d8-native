@@ -21,6 +21,9 @@ that has it's Vulkan capabilities stripped.
 This project makes no promises on stability, correctness or performance.
 It is provided as-is, to speed-up prototyping.
 
+# Current base
+Wine 11.10
+
 # Motivation
 While porting games from Windows to Linux, a big chunk of code is already
 written for the Direct3D 8 API.
