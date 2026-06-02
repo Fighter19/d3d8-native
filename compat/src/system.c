@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <time.h>
 
 BOOL CloseHandle(HANDLE hObject)
 {
@@ -17,14 +18,19 @@ BOOL SystemParametersInfoW(UINT uiAction, UINT uiParam, LPVOID lpvParam, UINT fW
 
 BOOL QueryPerformanceFrequency(LARGE_INTEGER *lpFrequency)
 {
-  STUBBED();
-  return FALSE;
+  lpFrequency->QuadPart = 1000; // 1ms resolution
+  return TRUE;
 }
 
 BOOL QueryPerformanceCounter(LARGE_INTEGER *lpPerformanceCount)
 {
-  STUBBED();
-  return FALSE;
+  struct timespec ts;
+  if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0)
+  {
+    return FALSE;
+  }
+  lpPerformanceCount->QuadPart = ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+  return TRUE;
 }
 
 DWORD GetTickCount(void)
